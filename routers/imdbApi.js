@@ -5,7 +5,8 @@ const configuration = require('../config');
 
 const router = express.Router();
 const popularMoviesID = [{imdbID: 'tt0120591',}, {imdbID: 'tt1201607',}, {imdbID: 'tt0099253',},
-    {imdbID: 'tt0111161',}, {imdbID: 'tt0167261',}, {imdbID: 'tt0120338',}, {imdbID: 'tt0118158'}];
+    {imdbID: 'tt0111161',}, {imdbID: 'tt0167261',}, {imdbID: 'tt0120338',}, {imdbID: 'tt0118158'},
+    {imdbID: 'tt0108778',}, {imdbID: 'tt0117571',}, {imdbID: 'tt0114709',}];
 let popularMoviesData = '';
 
 async function getMoviesByID(isInitialMovies, searchMoviesList) {
@@ -28,11 +29,18 @@ router.get('/searchMovie', (req, res) => {
     const movieName = req.query.search;
     fetch(`https://www.omdbapi.com/?s=${movieName}&apikey=${configuration.apiKey}`)
         .then(value => value.json())
-        .then(results => getMoviesByID(false, results.Search))
+        .then(results => {
+            console.log(results.Error);
+            if (results.Error === 'Movie not found!') {
+                res.status(200).send(JSON.stringify([]));
+            } else {
+                return getMoviesByID(false, results.Search);
+            }
+        })
         .then(results => {
             res.status(200).send(results);
         }).catch(error => {
-        res.status(501).send(JSON.stringify([]))
+        res.status(501).send();
     });
 });
 
